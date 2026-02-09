@@ -82,6 +82,11 @@ jobs:
           echo "upstream-repo : ${{inputs.upstream-repo}}"
           echo "upstream-repo-ref : ${{inputs.upstream-repo-ref}}"
           echo "pkg-repo : ${{inputs.pkg-repo}}"
+          if [[ -z "${{inputs.pkg-repo}}" ]]; then
+            echo "ERROR: inputs.pkg-repo is empty. Make sure that the caller workflow's repo has the repo variable PKG_REPO_GITHUB_NAME populated with the correct value. This variable should be in the format of owner/repo-name, for example: qualcomm-linux/pkg-repo"
+            exit 1
+          fi
+
 
       - name: Checkout qcom-build-utils
         uses: actions/checkout@v4
