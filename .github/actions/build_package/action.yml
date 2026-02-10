@@ -79,8 +79,10 @@ runs:
         # Host Architecture: The architecture for which the binaries are being built (invariably arm64).
 
         gbp buildpackage \
+          --git-no-pristine-tar \
           --git-ignore-branch \
-          --git-builder="sbuild --host=arm64 \
+          --git-builder="sbuild --no-clean-source \
+                                --host=arm64 \
                                 --build=${{env.BUILD_ARCH}} \
                                 --dist=${{inputs.distro-codename}} \
                                 $lintian_flag \
