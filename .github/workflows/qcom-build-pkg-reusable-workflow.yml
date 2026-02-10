@@ -41,8 +41,9 @@ on:
       runner:
         description: The runner to use for the build
         type: string
-        default: ubuntu-latest
-        #default: lecore-prd-u2404-arm64-xlrg-od-ephem
+        default: lecore-prd-u2404-arm64-xlrg-od-ephem
+        #default: ubuntu-latest
+        
 
     secrets:
       TOKEN:
