@@ -29,11 +29,6 @@ on:
         description: true if this is a test run. Packages will be uploaded in test folder in S3
         type: boolean
         default: true
-        
-      runner:
-        description: The runner to use for the build
-        type: string
-        default: ubuntu-latest
 
     secrets:
       TOKEN:
@@ -47,7 +42,7 @@ permissions:
 jobs:
   pkg-release:
 
-    runs-on: ${{inputs.runner}}
+    runs-on: ubuntu-24.04-arm
 
     outputs:
       complete_version: ${{ steps.changelog.outputs.version }}
@@ -58,7 +53,7 @@ jobs:
 
     container:
       # This docker image is built and published by the qualcomm-linux/docker_deb_build repo CI workflow
-      image: ghcr.io/qualcomm-linux/pkg-builder:${{inputs.runner == 'ubuntu-latest' && 'amd64' || 'arm64'}}-${{inputs.distro-codename}}
+      image: ghcr.io/qualcomm-linux/pkg-builder:arm64-${{inputs.distro-codename}}
       options: --privileged
       credentials:
         username: ${{vars.DEB_PKG_BOT_CI_USERNAME}}

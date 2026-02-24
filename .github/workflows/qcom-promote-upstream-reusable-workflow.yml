@@ -47,7 +47,7 @@ env:
 jobs:
   promote-upstream-version:
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04-arm
 
     defaults:
       run:
@@ -55,7 +55,7 @@ jobs:
 
     container:
       # This docker image is built and published by the qualcomm-linux/docker_deb_build repo CI workflow
-      image: ghcr.io/qualcomm-linux/pkg-builder:amd64-noble
+      image: ghcr.io/qualcomm-linux/pkg-builder:arm64-noble
       credentials:
         username: ${{ vars.DEB_PKG_BOT_CI_USERNAME }}
         password: ${{ secrets.TOKEN }}
