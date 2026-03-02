@@ -30,12 +30,6 @@ on:
         type: boolean
         default: true
 
-    secrets:
-      TOKEN:
-        required: true
-      QSC_TOKEN:
-        required: true
-
 permissions:
   contents: read
 
@@ -57,7 +51,7 @@ jobs:
       options: --privileged
       credentials:
         username: ${{vars.DEB_PKG_BOT_CI_USERNAME}}
-        password: ${{secrets.TOKEN}}
+        password: ${{secrets.DEB_PKG_BOT_CI_TOKEN}}
 
     steps:
 
@@ -75,7 +69,7 @@ jobs:
       - name: Checkout Packaging Repo
         uses: actions/checkout@v4
         with:
-          token: ${{secrets.TOKEN}}
+          token: ${{secrets.DEB_PKG_BOT_CI_TOKEN}}
           path: ./package-repo
           fetch-depth: 0
           fetch-tags: true
@@ -296,7 +290,7 @@ jobs:
       - name: Notify qcom-distro-images of new release via repository dispatch
         uses: peter-evans/repository-dispatch@v3
         with:
-          token: ${{secrets.TOKEN}}
+          token: ${{secrets.DEB_PKG_BOT_CI_TOKEN}}
           repository: qualcomm-linux/qcom-distro-images
           event-type: pkg-repo-release
           client-payload: >-

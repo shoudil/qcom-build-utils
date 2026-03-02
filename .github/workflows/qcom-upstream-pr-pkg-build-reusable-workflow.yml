@@ -39,10 +39,6 @@ on:
         type: string
         default: noble
 
-    secrets:
-      TOKEN:
-        required: true
-
 permissions:
   contents: read
 
@@ -68,7 +64,7 @@ jobs:
       options: --privileged
       credentials:
         username: ${{vars.DEB_PKG_BOT_CI_USERNAME}}
-        password: ${{secrets.TOKEN}}
+        password: ${{secrets.DEB_PKG_BOT_CI_TOKEN}}
 
     steps:
 
@@ -88,7 +84,7 @@ jobs:
         with:
           repository: qualcomm-linux/qcom-build-utils
           ref: ${{inputs.qcom-build-utils-ref}}
-          token: ${{secrets.TOKEN}}
+          token: ${{secrets.DEB_PKG_BOT_CI_TOKEN}}
           path: ./qcom-build-utils
           fetch-depth: 1
           sparse-checkout: |
@@ -100,7 +96,7 @@ jobs:
         with:
           repository: ${{inputs.pkg-repo}}
           clean: false
-          token: ${{secrets.TOKEN}}
+          token: ${{secrets.DEB_PKG_BOT_CI_TOKEN}}
           path: ./package-repo
           fetch-depth: 0
           fetch-tags: true
@@ -111,7 +107,7 @@ jobs:
           repository: ${{inputs.upstream-repo}}
           ref: ${{inputs.upstream-repo-ref}}
           clean: false
-          token: ${{secrets.TOKEN}}
+          token: ${{secrets.DEB_PKG_BOT_CI_TOKEN}}
           path: ./upstream-repo
           fetch-depth: 0
 
