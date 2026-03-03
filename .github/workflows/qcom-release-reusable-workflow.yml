@@ -29,15 +29,6 @@ on:
         description: true if this is a test run. Packages will be uploaded in test folder in S3
         type: boolean
         default: true
-        
-      runner:
-        description: The runner to use for the build
-        type: string
-        default: ubuntu-latest
-
-    secrets:
-      TOKEN:
-        required: true
 
 permissions:
   contents: read
@@ -45,7 +36,7 @@ permissions:
 jobs:
   pkg-release:
 
-    runs-on: ${{inputs.runner}}
+    runs-on: ubuntu-24.04-arm
 
     outputs:
       complete_version: ${{ steps.changelog.outputs.version }}
@@ -56,11 +47,11 @@ jobs:
 
     container:
       # This docker image is built and published by the qualcomm-linux/docker_deb_build repo CI workflow
-      image: ghcr.io/qualcomm-linux/pkg-builder:${{inputs.runner == 'ubuntu-latest' && 'amd64' || 'arm64'}}-${{inputs.distro-codename}}
+      image: ghcr.io/qualcomm-linux/pkg-builder:arm64-${{inputs.distro-codename}}
       options: --privileged
       credentials:
         username: ${{vars.DEB_PKG_BOT_CI_USERNAME}}
-        password: ${{secrets.TOKEN}}
+        password: ${{secrets.DEB_PKG_BOT_CI_TOKEN}}
 
     steps:
 
@@ -69,7 +60,6 @@ jobs:
         with:
           repository: qualcomm-linux/qcom-build-utils
           ref: ${{inputs.qcom-build-utils-ref}}
-          token: ${{secrets.TOKEN}}
           path: ./qcom-build-utils
           fetch-depth: 1
           sparse-checkout: |
@@ -79,7 +69,7 @@ jobs:
       - name: Checkout Packaging Repo
         uses: actions/checkout@v4
         with:
-          token: ${{secrets.TOKEN}}
+          token: ${{secrets.DEB_PKG_BOT_CI_TOKEN}}
           path: ./package-repo
           fetch-depth: 0
           fetch-tags: true
@@ -188,7 +178,8 @@ jobs:
               "packages": $MAIN_PKGS_JSON,
               "dev-packages": $DEV_PKGS_JSON,
 
-              "build_timestamp": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
+              "build_timestamp": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
+              "workflow_url": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}-${{ github.run_attempt }}"
             }
           }
           EOF
@@ -203,22 +194,11 @@ jobs:
           pkg-dir: package-repo
           build-dir: build
 
-      - name: Remove files with unauthorized characters
-        run: |
-          rm build/*.build
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-artifacts
-          path: build/
-
       # After the above step that changed the changlog from UNRELEASED to unstable, now create a new changelog entry
       # that bumps the version for the next development cycle and sets the suite back to UNRELEASED
       - name: Commit changelog suite change
+        working-directory: ./package-repo
         run: |
-          cd ./package-repo
-
           version=$(dpkg-parsechangelog --show-field Version)
 
           # bump Debian revision (last hyphen-separated field), e.g. 1.0.0-1 -> 1.0.0-2
@@ -242,10 +222,31 @@ jobs:
 
           git commit -a -m "Initial commit of new version ${newversion}"
 
-          git push origin ${{inputs.debian-branch}}
-          git push origin debian/${version}
+          #TODO reactivate those
+          #git push origin ${{inputs.debian-branch}}
+          #git push origin debian/${version}
 
           git log --graph --oneline -n 10 --color=always
+
+      - name: Prepare build logs for upload
+        working-directory: ./build/
+        run: |
+          # Remove symlink and rename timestamped .build file to its base name
+          BUILD_LINK=$(find . -maxdepth 1 -name "*.build" -type l)
+          if [ -n "$BUILD_LINK" ]; then
+            BUILD_TARGET=$(readlink "$BUILD_LINK")
+            rm "$BUILD_LINK"
+            mv "$BUILD_TARGET" "$BUILD_LINK"
+          fi
+          
+          # JFrog CLI does not allow colon characters in the properties, so we need to replace them with underscores in the build logs that are used to generate the properties for the upload step
+          sed -i 's/:/_/g' *.build
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: build/
 
   upload-to-s3:
     needs: pkg-release
@@ -285,3 +286,14 @@ jobs:
           s3_bucket: qli-prd-lecore-gh-artifacts
           path: build
           destination: ${{ env.S3_BUCKET_PATH }}
+
+      - name: Notify qcom-distro-images of new release via repository dispatch
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{secrets.DEB_PKG_BOT_CI_TOKEN}}
+          repository: qualcomm-linux/qcom-distro-images
+          event-type: pkg-repo-release
+          client-payload: >-
+            {
+              "artifact_path":"${{ env.S3_BUCKET_PATH }}"
+            }
