@@ -222,9 +222,8 @@ jobs:
 
           git commit -a -m "Initial commit of new version ${newversion}"
 
-          #TODO reactivate those
-          #git push origin ${{inputs.debian-branch}}
-          #git push origin debian/${version}
+          git push origin ${{inputs.debian-branch}}
+          git push origin debian/${version}
 
           git log --graph --oneline -n 10 --color=always
 
