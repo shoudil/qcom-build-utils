@@ -26,7 +26,7 @@ on:
       run-lintian:
         description: Run lintian or not during the build
         type: boolean
-        default: false
+        default: true
 
       run-abi-checker:
         description: Run the ABI checker or not
