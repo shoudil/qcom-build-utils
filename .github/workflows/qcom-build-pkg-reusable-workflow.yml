@@ -100,4 +100,4 @@ jobs:
         if: ${{inputs.run-abi-checker == true}}
         uses: ./qcom-build-utils/.github/actions/abi_checker
         with:
-          apt-repository: "deb [arch=arm64 trusted=yes] https://qualcomm-linux.github.io/pkg-oss-staging-repo ${{inputs.distro-codename}}/stable main"
+          apt-repository: "deb [arch=arm64 trusted=yes] https://qartifactory-edge.qualcomm.com/artifactory/qsc-deb-releases ${{inputs.distro-codename}} main"
