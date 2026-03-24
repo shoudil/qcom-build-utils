@@ -306,7 +306,7 @@ image_preprocessing() {
     echo "  COMPONENTS=$COMPONENTS"
     echo "  INCLUDE(from seed + required)=$INCLUDE_LIST"
 
-    if ! debootstrap --arch="$ARCH" --variant=minbase --components="$COMPONENTS" --include="$INCLUDE_LIST" "$CODENAME" "$ROOTFS_DIR" "$MIRROR"; then
+    if ! debootstrap --no-check-gpg --arch="$ARCH" --variant=minbase --components="$COMPONENTS" --include="$INCLUDE_LIST" "$CODENAME" "$ROOTFS_DIR" "$MIRROR"; then
         echo "[ERROR][preprocess] debootstrap failed."
         exit 1
     fi
