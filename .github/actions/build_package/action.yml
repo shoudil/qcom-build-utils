@@ -228,6 +228,7 @@ runs:
             --git-no-pristine-tar \
             --git-ignore-branch \
             --git-builder="sbuild --no-clean-source \
+                                  --dpkg-source-opt="--extend-diff-ignore=^\\.github" \
                                   --host=arm64 \
                                   --build=${{env.BUILD_ARCH}} \
                                   --dist=${{inputs.distro-codename}} \
