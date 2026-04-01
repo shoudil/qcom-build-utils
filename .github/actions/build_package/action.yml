@@ -152,8 +152,8 @@ runs:
           lintian_flag="--no-run-lintian"
         fi
 
-        if curl -sfI "http://pkg.qualcomm.com/dists/${{inputs.distro-codename}}/Release" > /dev/null; then
-          EXTRA_REPO="--extra-repository='deb [arch=arm64 trusted=yes] http://pkg.qualcomm.com ${{inputs.distro-codename}}/stable main'"
+        if curl -sfI "https://qartifactory-edge.qualcomm.com/ui/native/qsc-deb-releases/dists/${{inputs.distro-codename}}/Release" > /dev/null; then
+          EXTRA_REPO="--extra-repository='deb [arch=arm64 trusted=yes] https://qartifactory-edge.qualcomm.com/ui/native/qsc-deb-releases ${{inputs.distro-codename}} main'"
         else
           EXTRA_REPO=""
         fi
@@ -228,6 +228,7 @@ runs:
             --git-no-pristine-tar \
             --git-ignore-branch \
             --git-builder="sbuild --no-clean-source \
+                                  --dpkg-source-opt="--extend-diff-ignore=^\\.github" \
                                   --host=arm64 \
                                   --build=${{env.BUILD_ARCH}} \
                                   --dist=${{inputs.distro-codename}} \
