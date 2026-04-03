@@ -520,11 +520,9 @@ else
     # -----------------------------------------------------------------------
     # Step 5. Prepare debug ITS and generate qclinux_fit.img via mkimage
     # -----------------------------------------------------------------------
-    ITS_FILE="${DTB_METADATA_DIR}/qcom-fitimage.its"
+    ITS_FILE="${DTB_METADATA_DIR}/qcom-next-fitimage.its"
     ITS_BASENAME="$(basename "${ITS_FILE}")"
     ITS_STAGE_FILE="${FIT_STAGE}/${ITS_BASENAME}"
-    ITS_DBG="${FIT_STAGE}/${ITS_BASENAME%.its}_dbg.its"
-    cp "${ITS_FILE}" "${ITS_DBG}"
     cp "${ITS_FILE}" "${ITS_STAGE_FILE}"
 
     # Generate qclinux_fit.img via mkimage
